@@ -2,7 +2,7 @@ const canvas = document.getElementById("gameFrame");
 const ctx = canvas.getContext("2d");
 
 let key = 0;
-let frequency = 400;
+let frequency = 1000;
 
 let size = 10;
 let inertia = 5;
@@ -164,25 +164,45 @@ function keyUp(event) {
 const player = new Player(100, 100, size, inertia);
 const enemies = [];
 
+var timer;
+var spawnRate;
+
+function gameTime() {
+    var time = 0;
+    timer = setInterval(() => {
+        time += 1;
+        document.getElementById('gameTime').innerHTML =
+            '<p style="color:white;">Time: ' + (time / 10) + "s";
+
+        if ((time / 10) % 2 == 0 && frequency > 10) {
+            frequency -= 10;
+            console.log(frequency);
+            clearInterval(spawnRate);
+            spawnEnemies();
+        }
+    }, 100);
+}
+
 function spawnEnemies() {
-    setInterval(() => {
+    spawnRate = setInterval(() => {
         var enemyDirection = Math.floor(Math.random() * 4);
         var x = Math.floor(Math.random() * canvas.width);
         var y = Math.floor(Math.random() * canvas.height);
+        var velocity = Math.floor(Math.random() * 5) + 1;
         var colour = '#' + Math.floor(Math.random() * 16777215).toString(16);
 
         switch (enemyDirection) {
             case 0: // left to right
-                enemies.push(new Enemy(0, y, size, colour, 5, enemyDirection));
+                enemies.push(new Enemy(0, y, size, colour, velocity, enemyDirection));
                 break;
             case 1: // right to left
-                enemies.push(new Enemy(canvas.width - size, y, size, colour, 5, enemyDirection));
+                enemies.push(new Enemy(canvas.width - size, y, size, colour, velocity, enemyDirection));
                 break;
             case 2: // top to bottom
-                enemies.push(new Enemy(x, 0, size, colour, 5, enemyDirection));
+                enemies.push(new Enemy(x, 0, size, colour, velocity, enemyDirection));
                 break;
             case 3: // bottom to top
-                enemies.push(new Enemy(x, canvas.height - size, size, colour, 5, enemyDirection));
+                enemies.push(new Enemy(x, canvas.height - size, size, colour, velocity, enemyDirection));
                 break;
         }
     }, frequency);
@@ -202,9 +222,13 @@ function animate() {
 
         const distance = Math.hypot(player.x - enemy.x, player.y - enemy.y);
 
-        if (distance - enemy.size - player.size < 0) {
+        if (distance - (enemy.size / 2) - player.size < 0) {
             setTimeout(() => {
                 cancelAnimationFrame(animationId);
+
+                document.getElementById('gameover').innerHTML = 
+                '<p style="color:white;">Game over!</p><button type="button" id="playAgain" onClick="location.reload()">Play Again</button>';
+                clearInterval(timer);
             }, 25);
         }
 
@@ -219,3 +243,4 @@ function animate() {
 
 animate();
 spawnEnemies();
+gameTime();
