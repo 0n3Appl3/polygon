@@ -1,6 +1,10 @@
 const canvas = document.getElementById("gameFrame");
 const ctx = canvas.getContext("2d");
 
+// Sound effects from https://mixkit.co/free-sound-effects/arcade/?page=1
+var gameOverSound = new Audio('gameOver.wav');
+var enemySpawnSound = new Audio('enemySpawn.wav');
+
 let key = 0;
 let frequency = 1000;
 
@@ -11,6 +15,7 @@ let upPressed = false;
 let downPressed = false;
 let leftPressed = false;
 let rightPressed = false;
+let gameEnd = false;
 
 function boundryCheck(player) {
     //up
@@ -91,6 +96,7 @@ class Enemy {
         this.colour = colour;
         this.velocity = velocity;
         this.direction = direction;
+        enemySpawnSound.play();
     }
 
     draw() {
@@ -140,6 +146,10 @@ function keyDown(event) {
     if (event.keyCode == 39) {
         rightPressed = true;
     }
+    //enter
+    if (event.keyCode == 13 && gameEnd) {
+        location.reload();
+    }
 }
 
 function keyUp(event) {
@@ -172,10 +182,10 @@ function gameTime() {
     timer = setInterval(() => {
         time += 1;
         document.getElementById('gameTime').innerHTML =
-            '<p style="color:white;">Time: ' + (time / 10) + "s";
+            '<p>Time: ' + (time / 10) + " s";
 
         if ((time / 10) % 2 == 0 && frequency > 10) {
-            frequency -= 10;
+            frequency -= 20;
             console.log(frequency);
             clearInterval(spawnRate);
             spawnEnemies();
@@ -224,11 +234,14 @@ function animate() {
 
         if (distance - (enemy.size / 2) - player.size < 0) {
             setTimeout(() => {
+                gameOverSound.play();
                 cancelAnimationFrame(animationId);
 
                 document.getElementById('gameover').innerHTML = 
-                '<p style="color:white;">Game over!</p><button type="button" id="playAgain" onClick="location.reload()">Play Again</button>';
+                '<p>Game over</p><button type="button" id="playAgain" onClick="location.reload()">Play Again</button>';
                 clearInterval(timer);
+                clearInterval(spawnRate);
+                gameEnd = true;
             }, 25);
         }
 
@@ -244,3 +257,4 @@ function animate() {
 animate();
 spawnEnemies();
 gameTime();
+document.getElementById('gameObjective').innerHTML = "<p>Task: Avoid the polygons</p>";
