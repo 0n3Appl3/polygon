@@ -257,4 +257,4 @@ function animate() {
 animate();
 spawnEnemies();
 gameTime();
-document.getElementById('gameObjective').innerHTML = "<p>Task: Avoid the polygons</p>";
+document.getElementById('gameObjective').innerHTML = "<p>Task: Avoid the polygons. Use arrow keys to move</p>";
